@@ -23,36 +23,45 @@ h.GetLicenseStatus
 coef='BAAAAAAAMHAAAAAAFBMJCMEEOBGBKGODFOANCDBEIIBIHMPDHPNGDAAEHEFCNBPLLPGECCBEPADOOEPLDMGDMOPLEBDOMJODFKLNKMODCOPEHDOLBDNHBKBECCBHCHPDJPNNMJBEACIJFCAEJICEBJAEEOEOHHAEMNLIGHPDNNDBDFLLJOJOPNKLPAOBOFNDIHILELNDOEJHLMPDLAGFMKPDEGJBGDPLEJLCDBAMBGLPKFPDCAGILKAMMMHAEMBMEMNFCPBMNNGAEPLDKBIGGBAEJEIOANDMALANFBAEGIFMONIDNJECFLKLDMLEHFNLNDPAEAOLNNGHKKEEICAAKJEECBNJIKBEMHDHGFPLGDFBPFNLBGJHKBNDNBPHGJMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJBOJCILLPIPIGGMLMPOELMNLELAFAENDMKDAMBAEGDOFJPPLKLCFBFPLAAAAAAAAMGFHPJPLNDODEEAEMLDHJNBEKIBADEPLALIPEIAMMDCELIODAPHLFANLCMCOMAPLHJEOBCBMAAAAAAAAOLIFJGMLJIDGBGNDPNEHELPDMFJJCMODMFMCFDBEJELFFJBEAPNFFFAEJBJFGNPLNCDHDAAMCKKDLPMLGGLGBBAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANMMMMIPDAAAAAIPDAAAAAIPDAAAAAAAAAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPD';
 
 %Set excel file and sheet
-filename = 'WT_YMD.xlsx';
+Excel = actxserver ('Excel.Application'); 
+%Excel.Workbooks.Open('C:\YourAddInFolder\AddInNameWithExtension'); 
+%Excel.Workbooks.Item('AddInNameWithExtension').RunAutoMacros(1); 
+filename = 'C:\Users\Adam\Documents\GitHub\YawMoment\WT_YMD.xlsx';
+if ~exist(filename,'file') 
+    ExcelWorkbook = Excel.workbooks.Add; 
+    ExcelWorkbook.SaveAs(filename,1); 
+    ExcelWorkbook.Close(false); 
+end 
+invoke(Excel.Workbooks,'Open',filename);
 sheet = 1;
 
 %Get overall car mass from excel sheet
 xlRange = 'D6';
-mass = xlsread(filename,sheet,xlRange);
+mass = xlsread1(filename,sheet,xlRange);
 weight = mass *9.81;
 
 for m = 1:11
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
     xlRange = 'D35';
-    xlswrite(filename,A_y,sheet,xlRange);
+    xlswrite1(filename,A_y,sheet,xlRange);
     
     %Get FL FR RL RR static load from excel sheet
     %FL
     xlRange = 'H23';
-    FL = xlsread(filename,sheet,xlRange)*9.81;
+    FL = xlsread1(filename,sheet,xlRange)*9.81;
         
     %FR
     xlRange = 'I23';
-    FR = xlsread(filename,sheet,xlRange)*9.81;
+    FR = xlsread1(filename,sheet,xlRange)*9.81;
         
     %RL
     xlRange = 'H24';
-    RL = xlsread(filename,sheet,xlRange)*9.81;
+    RL = xlsread1(filename,sheet,xlRange)*9.81;
         
     %RR
     xlRange = 'I24';
-    RR = xlsread(filename,sheet,xlRange)*9.81;
+    RR = xlsread1(filename,sheet,xlRange)*9.81;
         
     %for each beta, do a delta sweep and plot on a graph
     
@@ -90,23 +99,23 @@ for m = 1:11
             %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
             %from excel sheet
             xlRange = 'D35';
-            xlswrite(filename,A_y(i),sheet,xlRange);
+            xlswrite1(filename,A_y(i),sheet,xlRange);
             
             %FL
             xlRange = 'H23';
-            FL = xlsread(filename,sheet,xlRange)*9.81;           
+            FL = xlsread1(filename,sheet,xlRange)*9.81;           
             
             %FR
             xlRange = 'I23';
-            FR = xlsread(filename,sheet,xlRange)*9.81;
+            FR = xlsread1(filename,sheet,xlRange)*9.81;
                        
             %RL
             xlRange = 'H24';
-            RL = xlsread(filename,sheet,xlRange)*9.81;
+            RL = xlsread1(filename,sheet,xlRange)*9.81;
                        
             %RR
             xlRange = 'I24';
-            RR = xlsread(filename,sheet,xlRange)*9.81;         
+            RR = xlsread1(filename,sheet,xlRange)*9.81;         
             
             %Calculate Fy from Pacejka Model
             FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
@@ -142,6 +151,12 @@ for m = 1:11
     hold on
     
 end
+
+Excel.ActiveWorkbook.Save; 
+Excel.Quit 
+Excel.delete 
+clear Excel
+
 %add (A_y, YM) to arrary array[N A_y]
 
 % plot array
