@@ -84,7 +84,7 @@ for i = 1:11
 
     converges = false;
 
-    while converges == false do
+    while converges == false
 
         %Calculate weight transfer
         %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
@@ -129,10 +129,10 @@ for i = 1:11
             A_y(i) = newA_y;
         end
 
-    end_while
+    end
 
     % Calculate Yaw Moment
-    FyFront = FyFl + FyFR;
+    FyFront = FyFL + FyFR;
     FyRear = FyRL + FyRR;
     YM(i) = (FyFront * a) - (FyRear * b);
 
