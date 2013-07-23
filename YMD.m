@@ -81,53 +81,63 @@ end
 
 
 for i = 1:11
-    %Calculate weight transfer
-    %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
-    %from excel sheet
-    xlRange = 'D35';
-    xlswrite(filename,A_y(11),sheet,xlRange);
-    
-    %FL
-    xlRange = 'H23';
-    FL = xlsread(filename,sheet,xlRange)*9.81;
-    
-    %FR
-    xlRange = 'I23';
-    FR = xlsread(filename,sheet,xlRange)*9.81;
-    
-    %RL
-    xlRange = 'H24';
-    RL = xlsread(filename,sheet,xlRange)*9.81;
-    
-    %RR
-    xlRange = 'I24';
-    RR = xlsread(filename,sheet,xlRange)*9.81;
-    
-    
-    %Calculate Fy from Pacejka Model
-    FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
-    FyFR = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
-    
-    FyRL = h.CalculateFy(RL,SR,0,0,11.176,2,coef);
-    FyRR = h.CalculateFy(RR,SR,0,0,11.176,2,coef);
-    
-    %Calculate new lateral acceleration
-    newA_y = (FyFL + FyFR + FyRL + FyRR)/weight;
-    
-    %Check for convergence
-    %difference between A_y and newA_y is <2%
-    per_diff = abs(A_y(i) - newA_y)/((A_y(i) + newA_y)/2);
+
+    converges = false;
+
+    while converges == false do
+
+        %Calculate weight transfer
+        %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
+        %from excel sheet
+        xlRange = 'D35';
+        xlswrite(filename,A_y(i),sheet,xlRange);
+
+        %FL
+        xlRange = 'H23';
+        FL = xlsread(filename,sheet,xlRange)*9.81;
+
+        %FR
+        xlRange = 'I23';
+        FR = xlsread(filename,sheet,xlRange)*9.81;
+
+        %RL
+        xlRange = 'H24';
+        RL = xlsread(filename,sheet,xlRange)*9.81;
+
+        %RR
+        xlRange = 'I24';
+        RR = xlsread(filename,sheet,xlRange)*9.81;
+
+
+        %Calculate Fy from Pacejka Model
+        FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
+        FyFR = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+
+        FyRL = h.CalculateFy(RL,SR,0,0,11.176,2,coef);
+        FyRR = h.CalculateFy(RR,SR,0,0,11.176,2,coef);
+
+        %Calculate new lateral acceleration
+        newA_y = (FyFL + FyFR + FyRL + FyRR)/weight;
+
+        %Check for convergence
+        %difference between A_y and newA_y is <2%
+        per_diff = abs(A_y(i) - newA_y)/((A_y(i) + newA_y)/2);
+
+        if per_diff < 2
+            converges = true;
+        else
+            A_y(i) = newA_y;
+        end
+
+    end_while
+
+    % Calculate Yaw Moment
+    FyFront = FyFl + FyFR;
+    FyRear = FyRL + FyRR;
+    YM(i) = (FyFront * a) - (FyRear * b);
+
+    converges = false;
 end
-
-
-%   A_y = newA_y;
-
-%    %Calculate Yaw Moment
-%    FyFront = FyFL + FyFR;
-%    FyRear = FyRL + FyRR;
-%    YM = (FyFront * a) - (FyRear * b);
-
-
 
 
 %add (A_y, YM) to arrary array[N A_y]
