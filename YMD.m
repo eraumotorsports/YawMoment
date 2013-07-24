@@ -5,8 +5,8 @@ clc
 R = 120; %radius inches
 a = 32; %distance from CG to front axle
 b = 32; %distance from CG to rear axle
-beta = [-5 -4 -3 -2 -1 0 1 2 3 4 5]; %body slip angle
-delta = [-5 -4 -3 -2 -1 0 1 2 3 4 5]; %front wheels steered angle
+beta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %body slip angle
+delta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %front wheels steered angle
 
 %Initialize OptimumT Add-in
 % Check if the Addin has been loaded and if it has not load the Addin
@@ -98,7 +98,7 @@ frc = xlsread(filename,sheet,'D30');
 rrc = xlsread(filename,sheet,'D31');
 
 
-for m = 1:11
+for m = 1:13
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
   
@@ -116,7 +116,7 @@ for m = 1:11
     
     %Loop
     %Calculate Fy from Pacejka Model
-    for i = 1:11
+    for i = 1:13
         FyFL(i) = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
         FyFR(i) = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
     end
@@ -126,12 +126,12 @@ for m = 1:11
     
     
     %Calculate lateral acceleration
-    for i = 1:11
+    for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL + FyRR)/weight;
     end
     
     
-    for i = 1:11
+    for i = 1:13
         
         converges = false;
         
@@ -185,7 +185,7 @@ end
 
 %for each delta, do a beta sweep and plot on a graph
 
-for m = 1:11
+for m = 1:13
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
   
@@ -203,7 +203,7 @@ for m = 1:11
     
     %Loop
     %Calculate Fy from Pacejka Model
-    for i = 1:11
+    for i = 1:13
         FyFL(i) = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
         FyFR(i) = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
         FyRL(i) = h.CalculateFy(RL,SR(i),0,0,11.176,2,coef);
@@ -214,22 +214,18 @@ for m = 1:11
     
     
     %Calculate lateral acceleration
-    for i = 1:11
+    for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL(i) + FyRR(i))/weight;
     end
     
     
-    for i = 1:11
+    for i = 1:13
         
         converges = false;
         
         while converges == false
                   
             %Calculate weight transfer
-            %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
-            %from excel sheet
-            %A_y(i)
-            
             [ FL,FR,RL,RR ] = wt( A_y(i),fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr );
             
             %Calculate Fy from Pacejka Model
@@ -269,42 +265,3 @@ for m = 1:11
     hold on
     
 end
-
-
-
-%Set corner G's to 0 in WT spread sheet
-
-%Get FL FR RL RR static loads from excel sheet
-
-%Loop
-%Calculate Fy from Pacejka Model
-
-%Calculate lateral acceleration
-%   A_y = (FyFL + FyFR + FyRL + FyRR)/car mass;
-
-%Calculate weight transfer
-%Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
-%from excel sheet
-
-%Calculate Fy from Pacejka Model
-
-%Calculate new lateral acceleration
-%   newA_y = (FyFL + FyFR + FyRL + FyRR)/car mass;
-
-%Check for convergence
-%difference between A_y and newA_y is <2%
-
-%   loop finished
-%  A_y = newA_y;
-
-%Calculate Yaw Moment
-%   FyFront = FyFL + FyFR;
-%   FyRear = FyRL + FyRR;
-%   YM = (FyFront * a) - (FyRear * b);
-
-%add (A_y, YM) to arrary array[N A_y]
-
-%plot array
-%hold on
-
-%change delta for next sweep
