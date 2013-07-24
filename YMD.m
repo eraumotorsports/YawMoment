@@ -22,37 +22,88 @@ h.GetLicenseStatus
 % Model Coefficient String
 coef='BAAAAAAAMHAAAAAAFBMJCMEEOBGBKGODFOANCDBEIIBIHMPDHPNGDAAEHEFCNBPLLPGECCBEPADOOEPLDMGDMOPLEBDOMJODFKLNKMODCOPEHDOLBDNHBKBECCBHCHPDJPNNMJBEACIJFCAEJICEBJAEEOEOHHAEMNLIGHPDNNDBDFLLJOJOPNKLPAOBOFNDIHILELNDOEJHLMPDLAGFMKPDEGJBGDPLEJLCDBAMBGLPKFPDCAGILKAMMMHAEMBMEMNFCPBMNNGAEPLDKBIGGBAEJEIOANDMALANFBAEGIFMONIDNJECFLKLDMLEHFNLNDPAEAOLNNGHKKEEICAAKJEECBNJIKBEMHDHGFPLGDFBPFNLBGJHKBNDNBPHGJMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJBOJCILLPIPIGGMLMPOELMNLELAFAENDMKDAMBAEGDOFJPPLKLCFBFPLAAAAAAAAMGFHPJPLNDODEEAEMLDHJNBEKIBADEPLALIPEIAMMDCELIODAPHLFANLCMCOMAPLHJEOBCBMAAAAAAAAOLIFJGMLJIDGBGNDPNEHELPDMFJJCMODMFMCFDBEJELFFJBEAPNFFFAEJBJFGNPLNCDHDAAMCKKDLPMLGGLGBBAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANMMMMIPDAAAAAIPDAAAAAIPDAAAAAAAAAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPD';
 
-%Set excel file and sheet
+
+%Ger car parameters from Excel sheet
 filename = 'WT_YMD.xlsx';
 sheet = 1;
 
-%Get overall car mass from excel sheet
-xlRange = 'D6';
-mass = xlsread(filename,sheet,xlRange);
+%Wheel base
+wb = xlsread(filename,sheet,'D3'); %mm
+
+%Front track
+ft = xlsread(filename,sheet,'D4'); %mm
+
+%Rear track
+rt = xlsread(filename,sheet,'D5'); %mm
+
+%Mass
+mass = xlsread(filename,sheet,'D6'); %kg
 weight = mass *9.81;
+
+%Total mass distribution
+md = xlsread(filename,sheet,'D7'); % %Fr
+
+%Front non suspended mass
+fnsm = xlsread(filename,sheet,'D8'); %kg
+
+%Rear non suspended mass
+rnsm = xlsread(filename,sheet,'D9'); %kg
+
+%Total mass CG height
+tmcgh = xlsread(filename,sheet,'D11'); %mm
+
+%Front non suspended mass CG height
+fnsmcgh = xlsread(filename,sheet,'D12'); %mm
+
+%Rear non suspended mass CG height
+rnsmcgh = xlsread(filename,sheet,'D13'); %mm
+
+%Suspended mass roll inertia (ref SM CG) - Ixx
+smri = xlsread(filename,sheet,'D19'); % kg.m^2
+
+%Front spring stiffness
+fss = xlsread(filename,sheet,'D20'); %N/mm
+
+%Rear
+rss = xlsread(filename,sheet,'D21'); %N/mm
+
+%Front ARB stiffness
+farbs = xlsread(filename,sheet,'D22'); %N.m/degree
+
+%Rear ARB stiffness
+rarbs = xlsread(filename,sheet,'D23'); %N.m/degree
+
+%Front tire stiffness
+fts = xlsread(filename,sheet,'D24'); %N/mm
+
+%Rear tire stiffness
+rts = xlsread(filename,sheet,'D25'); %N/mm
+
+%Front spring motion ratio
+fsmr = xlsread(filename,sheet,'D26');
+
+%Rear spring motion ratio
+rsmr = xlsread(filename,sheet,'D27');
+
+%Front anti roll bar motion ratio
+farbmr = xlsread(filename,sheet,'D28');
+
+%Rear anti roll bar motion ratio
+rarbmr = xlsread(filename,sheet,'D29');
+
+%Front roll center
+frc = xlsread(filename,sheet,'D30');
+
+%Rear roll center
+rrc = xlsread(filename,sheet,'D31');
+
 
 for m = 1:11
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
-    xlRange = 'D35';
-    xlswrite(filename,A_y,sheet,xlRange);
-    
+  
     %Get FL FR RL RR static load from excel sheet
-    %FL
-    xlRange = 'H23';
-    FL = xlsread(filename,sheet,xlRange)*9.81;
-        
-    %FR
-    xlRange = 'I23';
-    FR = xlsread(filename,sheet,xlRange)*9.81;
-        
-    %RL
-    xlRange = 'H24';
-    RL = xlsread(filename,sheet,xlRange)*9.81;
-        
-    %RR
-    xlRange = 'I24';
-    RR = xlsread(filename,sheet,xlRange)*9.81;
+    [ FL,FR,RL,RR ] = wt( A_y,fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr );
         
     %for each beta, do a delta sweep and plot on a graph
     
@@ -85,28 +136,13 @@ for m = 1:11
         converges = false;
         
         while converges == false
-            
+                  
             %Calculate weight transfer
             %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
             %from excel sheet
-            xlRange = 'D35';
-            xlswrite(filename,A_y(i),sheet,xlRange);
+            %A_y(i)
             
-            %FL
-            xlRange = 'H23';
-            FL = xlsread(filename,sheet,xlRange)*9.81;           
-            
-            %FR
-            xlRange = 'I23';
-            FR = xlsread(filename,sheet,xlRange)*9.81;
-                       
-            %RL
-            xlRange = 'H24';
-            RL = xlsread(filename,sheet,xlRange)*9.81;
-                       
-            %RR
-            xlRange = 'I24';
-            RR = xlsread(filename,sheet,xlRange)*9.81;         
+            [ FL,FR,RL,RR ] = wt( A_y(i),fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr );
             
             %Calculate Fy from Pacejka Model
             FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
