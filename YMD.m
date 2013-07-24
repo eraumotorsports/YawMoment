@@ -181,10 +181,96 @@ for m = 1:11
     hold on
     
 end
-%add (A_y, YM) to arrary array[N A_y]
 
 
 %for each delta, do a beta sweep and plot on a graph
+
+for m = 1:11
+    %Set corner G's to 0 in WT spread sheet
+    A_y = 0;
+  
+    %Get FL FR RL RR static load from excel sheet
+    [ FL,FR,RL,RR ] = wt( A_y,fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr );
+        
+    %for each beta, do a delta sweep and plot on a graph
+    
+    %Calculate front slip angles (no ackerman)
+    SF = (beta + (a/R) - delta(m))*-1;
+    
+    %Calculate rear slip angles (no ackerman)
+    SR = (beta - (b/R))*-1;
+    
+    
+    %Loop
+    %Calculate Fy from Pacejka Model
+    for i = 1:11
+        FyFL(i) = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
+        FyFR(i) = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+        FyRL(i) = h.CalculateFy(RL,SR(i),0,0,11.176,2,coef);
+        FyRR(i) = h.CalculateFy(RR,SR(i),0,0,11.176,2,coef);
+    end
+    
+
+    
+    
+    %Calculate lateral acceleration
+    for i = 1:11
+        A_y(i) = (FyFL(i) + FyFR(i) + FyRL(i) + FyRR(i))/weight;
+    end
+    
+    
+    for i = 1:11
+        
+        converges = false;
+        
+        while converges == false
+                  
+            %Calculate weight transfer
+            %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
+            %from excel sheet
+            %A_y(i)
+            
+            [ FL,FR,RL,RR ] = wt( A_y(i),fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr );
+            
+            %Calculate Fy from Pacejka Model
+            FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
+            FyFR = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+            
+            FyRL = h.CalculateFy(RL,SR(i),0,0,11.176,2,coef);
+            FyRR = h.CalculateFy(RR,SR(i),0,0,11.176,2,coef);
+            
+            %Calculate new lateral acceleration
+            newA_y = (FyFL + FyFR + FyRL + FyRR)/weight;
+            
+            %Check for convergence
+            %difference between A_y and newA_y is <2%
+            per_diff = abs(A_y(i) - newA_y)/((A_y(i) + newA_y)/2);
+            
+            if per_diff < 2
+                converges = true;
+            else
+                A_y(i) = newA_y;
+            end
+            
+        end
+        
+        % Calculate Yaw Moment
+        FyFront = FyFL + FyFR;
+        FyRear = FyRL + FyRR;
+        YM(i) = (FyFront * a) - (FyRear * b);
+        
+        converges = false;
+    end
+    
+    plot(A_y,YM)
+    title('Yaw Moment Diagram')
+    xlabel('Lateral Acceleration (G)')
+    ylabel('Yaw Moment (Nm)')
+    hold on
+    
+end
+
+
 
 %Set corner G's to 0 in WT spread sheet
 
