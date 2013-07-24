@@ -175,15 +175,14 @@ for m = 1:11
     end
     
     plot(A_y,YM)
+    title('Yaw Moment Diagram')
+    xlabel('Lateral Acceleration (G)')
+    ylabel('Yaw Moment (Nm)')
     hold on
     
 end
 %add (A_y, YM) to arrary array[N A_y]
 
-% plot array
-% hold on
-
-%change beta for next sweep
 
 %for each delta, do a beta sweep and plot on a graph
 
