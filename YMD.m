@@ -58,7 +58,7 @@ for m = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL + FyRR) / cp.Weight;
     end
 
-    [A_y, YM] = CalculateYM(0, h, A_y, cp, SF, SR, fcamber, rcamber, coef);
+    [A_y, YM] = CalculateYM(0, h, A_y, cp, SF, SR, fcamber, rcamber, coef, a, b);
 
     plot(A_y,YM)
     title('Yaw Moment Diagram')
@@ -89,7 +89,7 @@ for m = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL(i) + FyRR(i)) / cp.Weight;
     end
 
-    [A_y, YM] = CalculateYM(1, h, A_y, cp, SF, SR, fcamber, rcamber, coef);
+    [A_y, YM] = CalculateYM(1, h, A_y, cp, SF, SR, fcamber, rcamber, coef, a, b);
 
     plot(A_y,YM)
     title('Yaw Moment Diagram')

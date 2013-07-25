@@ -1,4 +1,4 @@
-function [A_y, YM] = CalculateYM(mode, h, A_y, cp, SF, SR, fcamber, rcamber, coef)
+function [A_y, YM] = CalculateYM(mode, h, A_y, cp, SF, SR, fcamber, rcamber, coef, a, b)
 
     for i = 1:13
 
