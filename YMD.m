@@ -3,6 +3,8 @@ clc
 
 %Parameters
 R = 120; %radius inches
+fcamber = 2.5; %front camber degrees (do not enter negative, already assumed to be negative)
+rcamber = 1.0; %rear camber degrees (do not enter negative, already assumed to be negative)
 beta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %body slip angle
 delta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %front wheels steered angle
 
@@ -51,12 +53,12 @@ for m = 1:13
     %Loop
     %Calculate Fy from Pacejka Model
     for i = 1:13
-        FyFL(i) = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
-        FyFR(i) = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+        FyFL(i) = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
+        FyFR(i) = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
     end
 
-    FyRL = h.CalculateFy(RL,SR,0,0,11.176,2,coef);
-    FyRR = h.CalculateFy(RR,SR,0,0,11.176,2,coef);
+    FyRL = h.CalculateFy(RL,SR,0,rcamber,11.176,2,coef);
+    FyRR = h.CalculateFy(RR,SR,0,rcamber,11.176,2,coef);
 
 
     %Calculate lateral acceleration
@@ -79,11 +81,11 @@ for m = 1:13
             [ FL,FR,RL,RR ] = wt( A_y(i), cp );
 
             %Calculate Fy from Pacejka Model
-            FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
-            FyFR = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+            FyFL = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
+            FyFR = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
 
-            FyRL = h.CalculateFy(RL,SR,0,0,11.176,2,coef);
-            FyRR = h.CalculateFy(RR,SR,0,0,11.176,2,coef);
+            FyRL = h.CalculateFy(RL,SR,0,rcamber,11.176,2,coef);
+            FyRR = h.CalculateFy(RR,SR,0,rcamber,11.176,2,coef);
 
             %Calculate new lateral acceleration
             newA_y = (FyFL + FyFR + FyRL + FyRR) / cp.Weight;
@@ -138,10 +140,10 @@ for m = 1:13
     %Loop
     %Calculate Fy from Pacejka Model
     for i = 1:13
-        FyFL(i) = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
-        FyFR(i) = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
-        FyRL(i) = h.CalculateFy(RL,SR(i),0,0,11.176,2,coef);
-        FyRR(i) = h.CalculateFy(RR,SR(i),0,0,11.176,2,coef);
+        FyFL(i) = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
+        FyFR(i) = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
+        FyRL(i) = h.CalculateFy(RL,SR(i),0,rcamber,11.176,2,coef);
+        FyRR(i) = h.CalculateFy(RR,SR(i),0,rcamber,11.176,2,coef);
     end
 
 
@@ -163,11 +165,11 @@ for m = 1:13
             [ FL,FR,RL,RR ] = wt( A_y(i), cp);
 
             %Calculate Fy from Pacejka Model
-            FyFL = h.CalculateFy(FL,SF(i),0,0,11.176,2,coef);
-            FyFR = h.CalculateFy(FR,SF(i),0,0,11.176,2,coef);
+            FyFL = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
+            FyFR = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
 
-            FyRL = h.CalculateFy(RL,SR(i),0,0,11.176,2,coef);
-            FyRR = h.CalculateFy(RR,SR(i),0,0,11.176,2,coef);
+            FyRL = h.CalculateFy(RL,SR(i),0,rcamber,11.176,2,coef);
+            FyRR = h.CalculateFy(RR,SR(i),0,rcamber,11.176,2,coef);
 
             %Calculate new lateral acceleration
             newA_y = (FyFL + FyFR + FyRL + FyRR) / cp.Weight;
