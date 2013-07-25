@@ -1,99 +1,100 @@
-function [ FL,FR,RL,RR ] = wt( A_y,fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr )
+%function [ FL,FR,RL,RR ] = wt( A_y,fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr )
+function [ FL,FR,RL,RR ] = wt( A_y, cp )
 %WT Weight Transfer
 %   Calculate dynamic wheel weights by using lateral acceleration
 
 %Non suspended mass weight distribution
-nsmd = fnsm/(rnsm+fnsm)*100; % %Fr
+nsmd = cp.FrontNonSuspMass /(cp.RearNonSuspMass + cp.FrontNonSuspMass) * 100; % %Fr
 
 %Suspended mass
-sm = mass-2*fnsm-2*rnsm; %kg
+sm = cp.Mass - 2 * cp.FrontNonSuspMass - 2 * cp.RearNonSuspMass; %kg
 
 %Suspended mass weight distribution
-smwd = (mass*md/100-fnsm*2)/sm*100; % %Fr
+smwd = (cp.Mass * cp.MassDistribution / 100 - cp.FrontNonSuspMass * 2) / sm * 100; % %Fr
 
 %Suspended mass CG coordinates
-smcgx = (100-md)/100*wb; %mm
+smcgx = (100 - cp.MassDistribution) / 100 * cp.WheelBase; %mm
 smcgy = 0; %mm
-smcgz = (mass*tmcgh-(2*fnsm*fnsmcgh+2*rnsm*rnsmcgh))/sm; %mm
+smcgz = (cp.Mass * cp.TotalMassCGHeight - (2 * cp.FrontNonSuspMass * cp.FrontNonSuspMassCGHeight + 2 * cp.RearNonSuspMass * cp.RearNonSuspMassCGHeight)) / sm; %mm
 
 %Front wheel rate
-fwr = fss/fsmr^2;
+fwr = cp.FrontSpringStiffness / cp.FrontSpringMotionRatio^2;
 
 %Rear wheel rate
-rwr = rss/rsmr^2;
+rwr = cp.RearSpringStiffness / cp.RearSpringMotionRatio^2;
 
 %Z Distance from SM CG to front roll axis
-zsmcgf = smcgz-frc; %mm
+zsmcgf = smcgz - cp.FrontRollCenter; %mm
 
 %Z Distance from SM CG to rear roll axis
-zsmcgr = smcgz-rrc; %mm
+zsmcgr = smcgz - cp.RearRollCenter; %mm
 
 %Z Distance from SM CG to roll axis @ SM CG
-zsmcg = smcgz-(((rrc-frc)/wb*((100-smwd)/100*wb))+frc);
+zsmcg = smcgz-(((cp.RearRollCenter - cp.FrontRollCenter) / cp.WheelBase * ((100 - smwd) / 100 * cp.WheelBase))+ cp.FrontRollCenter);
 
 %Suspended mass inertia in roll
-smi = smri+sm*(zsmcg/1000)^2;
+smi = cp.SuspMassRollInertia + sm * (zsmcg / 1000) ^ 2;
 
 %A-R moment coming from
 %front springs
-armfs = ((ft/1000)^2 *tan(1*(pi/180))*(fwr*1000))/2;
+armfs = ((cp.FrontTrack / 1000)^2 * tan(1 * (pi/180)) * (fwr * 1000))/2;
 %rear springs
-armrs = ((rt/1000)^2 *tan(1*(pi/180))*(rwr*1000))/2;
+armrs = ((cp.RearTrack / 1000)^2 * tan(1 * (pi/180)) * (rwr * 1000))/2;
 %total
-arm_springs = armfs+armrs;
+arm_springs = armfs + armrs;
 
 %A-R moment coming from
 %front ARB
-armfarb = farbs/farbmr^2;
+armfarb = cp.FrontARBStiffness / cp.FrontARBMotionRatio^2;
 %rear ARB
-armrarb = rarbs/rarbmr^2;
+armrarb = cp.RearTireStiffness / cp.RearARBMotionRatio^2;
 %total
-arm_arb = armfarb+armrarb;
+arm_arb = armfarb + armrarb;
 
 %Anti-roll moment total
-armt = arm_springs+arm_arb;
+armt = arm_springs + arm_arb;
 
 %Roll moment
-rm = sm*9.81*A_y*zsmcg/1000;
+rm = sm * 9.81 * A_y * zsmcg / 1000;
 
 %Roll angle due to lat G
-roll_angle = rm/armt;
+roll_angle = rm / armt;
 
 %Front non suspended mass weight transfer
-fnsmwt = fnsm*2*A_y*fnsmcgh/ft;
+fnsmwt = cp.FrontNonSuspMass * 2 * A_y * cp.FrontNonSuspMassCGHeight / cp.FrontTrack;
 
 %Rear non suspended mass weight transfer
-rnsmwet = rnsm*2*A_y*rnsmcgh/rt;
+rnsmwet = cp.RearNonSuspMass * 2 * A_y * cp.RearNonSuspMassCGHeight / cp.RearTrack;
 
 %Front suspended elastic weight transfer
-fsmelwt = (sm*A_y*zsmcg*(armfs+armfarb)/armt)/ft;
+fsmelwt = (sm * A_y * zsmcg * (armfs + armfarb) / armt) / cp.FrontTrack;
 
 %Rear suspended elastic weight transfer
-rsmelwt = (sm*A_y*zsmcg*(armrs+armrarb)/armt)/rt;
+rsmelwt = (sm * A_y * zsmcg * (armrs + armrarb) / armt) / cp.RearTrack;
 
 %Front suspended geo weight transfer
-fsmgwt = sm*(smwd/100)*A_y*frc/ft;
+fsmgwt = sm * (smwd / 100) * A_y * cp.FrontRollCenter / cp.FrontTrack;
 
 %Rear suspended geo weight transfer
-rsmgwt = sm*((100-smwd)/100)*A_y*rrc/rt;
+rsmgwt = sm * ((100 - smwd) / 100) * A_y * cp.RearRollCenter / cp.RearTrack;
 
 %Front total weight transfer
-ftwt = fnsmwt+fsmelwt+fsmgwt;
+ftwt = fnsmwt + fsmelwt + fsmgwt;
 
 %Rear total weight transfer
-rtwt = rnsmwet+rsmelwt+rsmgwt;
+rtwt = rnsmwet + rsmelwt + rsmgwt;
 
 %Front left dynamic load
-FL = (((mass*md/100)/2)-ftwt)*9.81;
+FL = (((cp.Mass * cp.MassDistribution / 100) / 2) - ftwt) * 9.81;
 
 %Front right dynamic load
-FR = (((mass*md/100)/2)+ftwt)*9.81;
+FR = (((cp.Mass * cp.MassDistribution / 100) / 2) + ftwt) * 9.81;
 
 %Rear left dynamic load
-RL = (((mass*(100-md)/100)/2)-rtwt)*9.81;
+RL = (((cp.Mass * (100- cp.MassDistribution ) / 100) / 2) - rtwt) * 9.81;
 
 %Rear right dynamic load
-RR = (((mass*(100-md)/100)/2)+rtwt)*9.81;
+RR = (((cp.Mass * (100- cp.MassDistribution ) / 100) / 2) + rtwt) * 9.81;
 
 end
 
