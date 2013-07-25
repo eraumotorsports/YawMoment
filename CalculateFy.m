@@ -1,4 +1,4 @@
-function [FyFL, FyFR, FyRL, FyRR] = CalculateFy(mode, h, FL, FR, RL, RR, SF, fcamber, rcamber, coef)
+function [FyFL, FyFR, FyRL, FyRR] = CalculateFy(mode, h, FL, FR, RL, RR, SF, SR, fcamber, rcamber, coef)
 
     for i = 1:13
         FyFL(i) = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);

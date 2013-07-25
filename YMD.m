@@ -51,7 +51,7 @@ for m = 1:13
     SR = (beta(m) - (b/R))*-1;
 
     %Calculate Fy from Pacejka Model
-    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(0, h, FL, FR, RL, RR, SF, fcamber, rcamber, coef);
+    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(0, h, FL, FR, RL, RR, SF, SR, fcamber, rcamber, coef);
 
     %Calculate lateral acceleration
     for i = 1:13
@@ -82,7 +82,7 @@ for m = 1:13
     SR = (beta - (b/R))*-1;
 
     %Calculate Fy from Pacejka Model
-    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(1, h, FL, FR, RL, RR, SF, fcamber, rcamber, coef);
+    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(1, h, FL, FR, RL, RR, SF, SR, fcamber, rcamber, coef);
 
     %Calculate lateral acceleration
     for i = 1:13
