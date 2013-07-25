@@ -1,5 +1,8 @@
-clear
-clc
+%% Yaw Moment Calculator
+%  ERAU Motorsports
+
+%% Initialize constants and add-ins
+clear all; clc;
 
 %Parameters
 R = 120; %radius inches
@@ -23,7 +26,7 @@ h.GetLicenseStatus
 coef='BAAAAAAAMHAAAAAAFBMJCMEEOBGBKGODFOANCDBEIIBIHMPDHPNGDAAEHEFCNBPLLPGECCBEPADOOEPLDMGDMOPLEBDOMJODFKLNKMODCOPEHDOLBDNHBKBECCBHCHPDJPNNMJBEACIJFCAEJICEBJAEEOEOHHAEMNLIGHPDNNDBDFLLJOJOPNKLPAOBOFNDIHILELNDOEJHLMPDLAGFMKPDEGJBGDPLEJLCDBAMBGLPKFPDCAGILKAMMMHAEMBMEMNFCPBMNNGAEPLDKBIGGBAEJEIOANDMALANFBAEGIFMONIDNJECFLKLDMLEHFNLNDPAEAOLNNGHKKEEICAAKJEECBNJIKBEMHDHGFPLGDFBPFNLBGJHKBNDNBPHGJMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJBOJCILLPIPIGGMLMPOELMNLELAFAENDMKDAMBAEGDOFJPPLKLCFBFPLAAAAAAAAMGFHPJPLNDODEEAEMLDHJNBEKIBADEPLALIPEIAMMDCELIODAPHLFANLCMCOMAPLHJEOBCBMAAAAAAAAOLIFJGMLJIDGBGNDPNEHELPDMFJJCMODMFMCFDBEJELFFJBEAPNFFFAEJBJFGNPLNCDHDAAMCKKDLPMLGGLGBBAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANMMMMIPDAAAAAIPDAAAAAIPDAAAAAAAAAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPD';
 
 
-%Ger car parameters from Excel sheet
+%% Load car parameters from Excel sheet
 filename = 'WT_YMD.xlsx';
 
 cp = CarParameters;
@@ -34,6 +37,7 @@ a_mm = cp.WheelBase - b_mm;
 a = a_mm*.0393701;
 b = b_mm*.0393701;
 
+%% For each beta, do a delta sweep and plot on a graph
 for m = 1:13
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
@@ -41,14 +45,11 @@ for m = 1:13
     %Get FL FR RL RR static load from excel sheet
     [ FL,FR,RL,RR ] = wt( A_y, cp );
 
-    %for each beta, do a delta sweep and plot on a graph
-
     %Calculate front slip angles (no ackerman)
     SF = (beta(m) + (a/R) - delta)*-1;
 
     %Calculate rear slip angles (no ackerman)
     SR = (beta(m) - (b/R))*-1;
-
 
     %Loop
     %Calculate Fy from Pacejka Model
@@ -65,7 +66,6 @@ for m = 1:13
     for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL + FyRR) / cp.Weight;
     end
-
 
     for i = 1:13
 
@@ -118,17 +118,13 @@ for m = 1:13
 
 end
 
-
-%for each delta, do a beta sweep and plot on a graph
-
+%% For each beta, do a delta sweep and plot on a graph
 for m = 1:13
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
 
     %Get FL FR RL RR static load from excel sheet
     [ FL,FR,RL,RR ] = wt( A_y, cp);
-
-    %for each beta, do a delta sweep and plot on a graph
 
     %Calculate front slip angles (no ackerman)
     SF = (beta + (a/R) - delta(m))*-1;
@@ -146,14 +142,10 @@ for m = 1:13
         FyRR(i) = h.CalculateFy(RR,SR(i),0,rcamber,11.176,2,coef);
     end
 
-
-
-
     %Calculate lateral acceleration
     for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL(i) + FyRR(i)) / cp.Weight;
     end
-
 
     for i = 1:13
 
