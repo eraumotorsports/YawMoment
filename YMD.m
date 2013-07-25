@@ -118,7 +118,7 @@ for m = 1:13
 
 end
 
-%% For each beta, do a delta sweep and plot on a graph
+%% For each delta, do a beta sweep and plot on a graph
 for m = 1:13
     %Set corner G's to 0 in WT spread sheet
     A_y = 0;
@@ -193,3 +193,6 @@ for m = 1:13
     hold on
 
 end
+
+% Plot combined graphs
+plot(A_y,YM)
