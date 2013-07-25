@@ -25,7 +25,6 @@ h.GetLicenseStatus
 % Model Coefficient String
 coef='BAAAAAAAMHAAAAAAFBMJCMEEOBGBKGODFOANCDBEIIBIHMPDHPNGDAAEHEFCNBPLLPGECCBEPADOOEPLDMGDMOPLEBDOMJODFKLNKMODCOPEHDOLBDNHBKBECCBHCHPDJPNNMJBEACIJFCAEJICEBJAEEOEOHHAEMNLIGHPDNNDBDFLLJOJOPNKLPAOBOFNDIHILELNDOEJHLMPDLAGFMKPDEGJBGDPLEJLCDBAMBGLPKFPDCAGILKAMMMHAEMBMEMNFCPBMNNGAEPLDKBIGGBAEJEIOANDMALANFBAEGIFMONIDNJECFLKLDMLEHFNLNDPAEAOLNNGHKKEEICAAKJEECBNJIKBEMHDHGFPLGDFBPFNLBGJHKBNDNBPHGJMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJBOJCILLPIPIGGMLMPOELMNLELAFAENDMKDAMBAEGDOFJPPLKLCFBFPLAAAAAAAAMGFHPJPLNDODEEAEMLDHJNBEKIBADEPLALIPEIAMMDCELIODAPHLFANLCMCOMAPLHJEOBCBMAAAAAAAAOLIFJGMLJIDGBGNDPNEHELPDMFJJCMODMFMCFDBEJELFFJBEAPNFFFAEJBJFGNPLNCDHDAAMCKKDLPMLGGLGBBAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANMMMMIPDAAAAAIPDAAAAAIPDAAAAAAAAAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPDAAAAAIPD';
 
-
 %% Load car parameters from Excel sheet
 filename = 'WT_YMD.xlsx';
 
@@ -51,71 +50,21 @@ for m = 1:13
     %Calculate rear slip angles (no ackerman)
     SR = (beta(m) - (b/R))*-1;
 
-    %Loop
     %Calculate Fy from Pacejka Model
-    for i = 1:13
-        FyFL(i) = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
-        FyFR(i) = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
-    end
-
-    FyRL = h.CalculateFy(RL,SR,0,rcamber,11.176,2,coef);
-    FyRR = h.CalculateFy(RR,SR,0,rcamber,11.176,2,coef);
-
+    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(0, h, FL, SF, fcamber, rcamber, coef);
 
     %Calculate lateral acceleration
     for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL + FyRR) / cp.Weight;
     end
 
-    for i = 1:13
-
-        converges = false;
-
-        while converges == false
-
-            %Calculate weight transfer
-            %Set G's to "A-y" in WT spread sheet Get FL FR RL RR dynamic loads
-            %from excel sheet
-            %A_y(i)
-
-            [ FL,FR,RL,RR ] = wt( A_y(i), cp );
-
-            %Calculate Fy from Pacejka Model
-            FyFL = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
-            FyFR = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
-
-            FyRL = h.CalculateFy(RL,SR,0,rcamber,11.176,2,coef);
-            FyRR = h.CalculateFy(RR,SR,0,rcamber,11.176,2,coef);
-
-            %Calculate new lateral acceleration
-            newA_y = (FyFL + FyFR + FyRL + FyRR) / cp.Weight;
-
-            %Check for convergence
-            %difference between A_y and newA_y is <2%
-            per_diff = abs(A_y(i) - newA_y)/((A_y(i) + newA_y)/2);
-
-            if per_diff < 2
-                converges = true;
-            else
-                A_y(i) = newA_y;
-            end
-
-        end
-
-        % Calculate Yaw Moment
-        FyFront = FyFL + FyFR;
-        FyRear = FyRL + FyRR;
-        YM(i) = (FyFront * a) - (FyRear * b);
-
-        converges = false;
-    end
+    [A_y, YM] = CalculateYM(0, h, A_y, cp, SF, SR, fcamber, rcamber, coef);
 
     plot(A_y,YM)
     title('Yaw Moment Diagram')
     xlabel('Lateral Acceleration (G)')
     ylabel('Yaw Moment (Nm)')
     hold on
-
 end
 
 %% For each beta, do a delta sweep and plot on a graph
@@ -124,7 +73,7 @@ for m = 1:13
     A_y = 0;
 
     %Get FL FR RL RR static load from excel sheet
-    [ FL,FR,RL,RR ] = wt( A_y, cp);
+    [ FL,FR,RL,RR ] = wt( A_y, cp );
 
     %Calculate front slip angles (no ackerman)
     SF = (beta + (a/R) - delta(m))*-1;
@@ -132,64 +81,19 @@ for m = 1:13
     %Calculate rear slip angles (no ackerman)
     SR = (beta - (b/R))*-1;
 
-
-    %Loop
     %Calculate Fy from Pacejka Model
-    for i = 1:13
-        FyFL(i) = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
-        FyFR(i) = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
-        FyRL(i) = h.CalculateFy(RL,SR(i),0,rcamber,11.176,2,coef);
-        FyRR(i) = h.CalculateFy(RR,SR(i),0,rcamber,11.176,2,coef);
-    end
+    [FyFL, FyFR, FyRL, FyRR] = CalculateFy(1, h, FL, SF, fcamber, rcamber, coef);
 
     %Calculate lateral acceleration
     for i = 1:13
         A_y(i) = (FyFL(i) + FyFR(i) + FyRL(i) + FyRR(i)) / cp.Weight;
     end
 
-    for i = 1:13
-
-        converges = false;
-
-        while converges == false
-
-            %Calculate weight transfer
-            [ FL,FR,RL,RR ] = wt( A_y(i), cp);
-
-            %Calculate Fy from Pacejka Model
-            FyFL = h.CalculateFy(FL,SF(i),0,fcamber,11.176,2,coef);
-            FyFR = h.CalculateFy(FR,SF(i),0,fcamber,11.176,2,coef);
-
-            FyRL = h.CalculateFy(RL,SR(i),0,rcamber,11.176,2,coef);
-            FyRR = h.CalculateFy(RR,SR(i),0,rcamber,11.176,2,coef);
-
-            %Calculate new lateral acceleration
-            newA_y = (FyFL + FyFR + FyRL + FyRR) / cp.Weight;
-
-            %Check for convergence
-            %difference between A_y and newA_y is <2%
-            per_diff = abs(A_y(i) - newA_y)/((A_y(i) + newA_y) / 2);
-
-            if per_diff < 2
-                converges = true;
-            else
-                A_y(i) = newA_y;
-            end
-
-        end
-
-        % Calculate Yaw Moment
-        FyFront = FyFL + FyFR;
-        FyRear = FyRL + FyRR;
-        YM(i) = (FyFront * a) - (FyRear * b);
-
-        converges = false;
-    end
+    [A_y, YM] = CalculateYM(1, h, A_y, cp, SF, SR, fcamber, rcamber, coef);
 
     plot(A_y,YM)
     title('Yaw Moment Diagram')
     xlabel('Lateral Acceleration (G)')
     ylabel('Yaw Moment (Nm)')
     hold on
-
 end
