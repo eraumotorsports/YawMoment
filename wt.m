@@ -1,4 +1,3 @@
-%function [ FL,FR,RL,RR ] = wt( A_y,fnsm,rnsm,mass,md,wb,tmcgh,fnsmcgh,rnsmcgh,fss,rss,fsmr,rsmr,frc,rrc,smri,ft,rt,farbs,farbmr,rarbs,rarbmr )
 function [ FL,FR,RL,RR ] = wt( A_y, cp )
 %WT Weight Transfer
 %   Calculate dynamic wheel weights by using lateral acceleration
