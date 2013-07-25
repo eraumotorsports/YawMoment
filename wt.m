@@ -47,7 +47,7 @@ arm_springs = armfs + armrs;
 %front ARB
 armfarb = cp.FrontARBStiffness / cp.FrontARBMotionRatio^2;
 %rear ARB
-armrarb = cp.RearTireStiffness / cp.RearARBMotionRatio^2;
+armrarb = cp.RearARBStiffness / cp.RearARBMotionRatio^2;
 %total
 arm_arb = armfarb + armrarb;
 
