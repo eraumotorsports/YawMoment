@@ -3,8 +3,6 @@ clc
 
 %Parameters
 R = 120; %radius inches
-a = 32; %distance from CG to front axle
-b = 32; %distance from CG to rear axle
 beta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %body slip angle
 delta = [-6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6]; %front wheels steered angle
 
@@ -96,6 +94,11 @@ frc = xlsread(filename,sheet,'D30');
 
 %Rear roll center
 rrc = xlsread(filename,sheet,'D31');
+
+b_mm = (md/100)*wb;
+a_mm = wb-b_mm;
+a = a_mm*.0393701;
+b = b_mm*.0393701;
 
 
 for m = 1:13
